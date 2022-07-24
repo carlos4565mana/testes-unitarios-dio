@@ -3,6 +3,7 @@ package com.carlos.api.services.impl;
 import com.carlos.api.domain.User;
 import com.carlos.api.domain.dto.UserDTO;
 import com.carlos.api.repositories.UserRepository;
+import com.carlos.api.services.exceptions.ObjectNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class UserServiceImplTest {
 
 
     @InjectMocks
-    private UserServiceImpl userService;
+    private UserServiceImpl service;
 
     @Mock
     private UserRepository repository;
@@ -56,7 +57,7 @@ class UserServiceImplTest {
     void whenFindByIdThenReturnUserInstance() {
         when(repository.findById(anyInt())).thenReturn(optionalUser);
 
-        User response = userService.findById(ID);
+        User response = service.findById(ID);
 
         assertNotNull(response);
         assertEquals(User.class, response.getClass());
@@ -65,6 +66,17 @@ class UserServiceImplTest {
         assertEquals(EMAIL, response.getEmail());
 
 
+    }
+
+    @Test
+    void whenFindByIdReturnAnObjectNotFoundException(){
+        when(repository.findById(anyInt())).thenThrow(new ObjectNotFoundException("Object not found."));
+        try{
+            service.findById(ID);
+        }catch (Exception ex){
+            assertEquals(ObjectNotFoundException.class, ex.getClass());
+            assertEquals("Object not found.", ex.getMessage());
+        }
     }
 
     @Test
