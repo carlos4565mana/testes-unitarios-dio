@@ -3,6 +3,7 @@ package com.carlos.api.services.impl;
 import com.carlos.api.domain.User;
 import com.carlos.api.domain.dto.UserDTO;
 import com.carlos.api.repositories.UserRepository;
+import com.carlos.api.services.exceptions.DataIntegratyViolationException;
 import com.carlos.api.services.exceptions.ObjectNotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -108,6 +109,19 @@ class UserServiceImplTest {
         assertEquals(EMAIL, response.getEmail());
         assertEquals(PASSWORD, response.getPassword());
 
+    }
+
+    @Test
+    void whenCreateThenReturnAnDataIntegrityViolationException() {
+        when(repository.findByEmail(anyString())).thenReturn(optionalUser);
+
+        try{
+            optionalUser.get().setId(2);
+            service.create(userDTO);
+        }catch (Exception ex){
+            assertEquals(DataIntegratyViolationException.class, ex.getClass());
+            assertEquals("E-mail already registered.", ex.getMessage());
+        }
     }
 
     @Test
