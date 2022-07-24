@@ -11,6 +11,7 @@ import com.carlos.api.domain.User;
 import com.carlos.api.domain.dto.UserDTO;
 import com.carlos.api.repositories.UserRepository;
 import com.carlos.api.services.UserService;
+import com.carlos.api.services.exceptions.DataIntegratyViolationException;
 import com.carlos.api.services.exceptions.ObjectNotFoundException;
 
 @Service
@@ -34,8 +35,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User create(UserDTO obj) {
-	
+		findByEmail(obj);
 		return repository.save(mapper.map(obj, User.class));
+	}
+	
+	private void findByEmail(UserDTO obj) {
+		Optional<User> user = repository.findByEmail(obj.getEmail());
+		if(user.isPresent()) {
+			throw new DataIntegratyViolationException("E-mail already registered.");
+		}
 	}
 
 }
